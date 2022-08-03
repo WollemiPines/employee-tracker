@@ -37,12 +37,18 @@ const introPage = () => {
         switch(response.intro_page){
             case 'view all departments': 
                 console.log("view all departments");
-                db.query('SELECT COUNT(id) AS total_employees FROM employee', function (err, results) { 
+                db.query('SELECT ALL name AS departments FROM department', function (err, results) { 
                 console.table(results);});
                 break;
             case 'view all roles':
+                console.log("view all roles");
+                db.query('SELECT ALL title AS roles FROM role', function (err, results) { 
+                console.table(results);});
                 break;
             case 'view all employees':
+                console.log("view all employees");
+                db.query('SELECT ALL id, first_name, last_name, role_id FROM employee', function (err, results) { 
+                console.table(results);});
                 break;
             case 'add a department':
                 break;
