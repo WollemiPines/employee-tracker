@@ -36,33 +36,65 @@ const introPage = () => {
     .then(response => {
         switch(response.intro_page){
             case 'view all departments': 
-                console.log("view all departments");
-                db.query('SELECT ALL name AS departments FROM department', function (err, results) { 
-                console.table(results);});
+                db.query('SELECT ALL id, name FROM department', function (err, results) { 
+                console.table(results);
+                returnFun();});
                 break;
+
             case 'view all roles':
-                console.log("view all roles");
-                db.query('SELECT ALL title AS roles FROM role', function (err, results) { 
-                console.table(results);});
+                db.query('SELECT * FROM role INNER JOIN department', function (err, results) { 
+                console.table(results);
+                returnFun();
+                if (err) {
+                    return console.error(err.message);}});
                 break;
+
             case 'view all employees':
-                console.log("view all employees");
-                db.query('SELECT ALL id, first_name, last_name, role_id FROM employee', function (err, results) { 
-                console.table(results);});
+                db.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title
+                FROM employee 
+                JOIN role ON role.title = employee.role_id;`, function (err, results) { 
+                console.table(results);
+                returnFun();
+                if (err) {
+                    return console.error(err.message);}});
                 break;
+
             case 'add a department':
+                returnFun();
                 break;
             case 'add a role':
+                returnFun();
                 break;
             case 'add an employee':
+                returnFun();
                 break;
             case 'update an employee role':
+                returnFun();
                 break;
             default: console.log("Please select an option")
                     introPage();
         }
     })
     }
+
+const returnFun = () => {
+    return  inquirer.prompt([  
+        {
+          type: 'list',
+          name: 'rtn_fun',
+          message: 'Whats next?',
+          choices: ['Return', 'Quit']
+        },]
+        ).then(response => {
+            if(response.rtn_fun === 'Return'){
+                introPage();
+            }
+            else if (response.rtn_fun === 'Quit'){
+                process.exit();
+            }
+        })
+            
+}
     //.then((response) =>{console.info(response.intro_page)})
     // db.query('SELECT COUNT(id) AS total_employees FROM employee', function (err, results) { 
     //     console.log(results);
