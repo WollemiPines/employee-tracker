@@ -36,23 +36,28 @@ const introPage = () => {
     .then(response => {
         switch(response.intro_page){
             case 'view all departments': 
-                db.query('SELECT ALL id, name FROM department', function (err, results) { 
+                db.query('SELECT department.id, department.name FROM department', function (err, results) { 
                 console.table(results);
                 returnFun();});
                 break;
 
             case 'view all roles':
-                db.query('SELECT * FROM role INNER JOIN department', function (err, results) { 
+                db.query(`SELECT role.title, role.id, role.salary, department.name AS department FROM role
+                RIGHT JOIN department on role.department_id = department.id;`, function (err, results) { 
                 console.table(results);
                 returnFun();
+
                 if (err) {
                     return console.error(err.message);}});
                 break;
 
             case 'view all employees':
-                db.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title
-                FROM employee 
-                JOIN role ON role.title = employee.role_id;`, function (err, results) { 
+                db.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name 
+                AS department, role.salary, 
+                CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee 
+                LEFT JOIN role on employee.role_id = role.id 
+                LEFT JOIN department on role.department_id = department.id 
+                LEFT JOIN employee manager on manager.id = employee.manager_id;`, function (err, results) { 
                 console.table(results);
                 returnFun();
                 if (err) {
