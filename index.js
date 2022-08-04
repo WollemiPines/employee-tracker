@@ -46,7 +46,6 @@ const introPage = () => {
                 RIGHT JOIN department on role.department_id = department.id;`, function (err, results) { 
                 console.table(results);
                 returnFun();
-
                 if (err) {
                     return console.error(err.message);}});
                 break;
@@ -65,17 +64,36 @@ const introPage = () => {
                 break;
 
             case 'add a department':
-                returnFun();
-                break;
+                return inquirer.prompt([ {
+                    type: 'text',
+                    name: 'dept_add',
+                    message: 'What is the deptartment called?'
+                },]).then(response => {
+                    let newDept = response.dept_add;
+                    console.log(newDept);
+                    db.query(`INSERT INTO department(name)
+                    VALUES (?)`,[newDept], function (err, results) { 
+                    db.query("SELECT * FROM department", function (err, results) {
+                        console.table(results);
+                        returnFun();
+                        if (err) {
+                        return console.error(err.message);}} );
+                    if (err) {
+                        return console.error(err.message);}})});
+                    break;
+
             case 'add a role':
                 returnFun();
                 break;
+
             case 'add an employee':
                 returnFun();
                 break;
+
             case 'update an employee role':
                 returnFun();
                 break;
+
             default: console.log("Please select an option")
                     introPage();
         }
