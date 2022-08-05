@@ -8,11 +8,11 @@ VALUES (1, "IT"),
 
 INSERT INTO role (id, title, salary, department_id)
 VALUES 
-(1, "Teacher", 60000, 1),
-(2, "Teacher", 63000, 2),
-(3, "Teacher", 71000, 3),
-(4, "Teacher", 55000, 4),
-(5, "Teacher", 62500, 5),
+(1, "IT Teacher", 60000, 1),
+(2, "Maths Teacher", 63000, 2),
+(3, "Science Teacher", 71000, 3),
+(4, "English Teacher", 55000, 4),
+(5, "History Teacher", 62500, 5),
 (6, "Assistant Principal", 75000, 6),
 (7, "Principal", 990000, 6);
 

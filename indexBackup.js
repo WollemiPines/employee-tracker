@@ -99,10 +99,10 @@ const introPage = () => {
                     let newRole = response.role_add;
                     let newSal = response.salary_add;
                     let relDept = response.related_department;
-                    let newRes = (getDeptByName("'"+ relDept + "'"));
+                    getDeptByName(relDept);
 
-                    db.query(`INSERT INTO role (title, salary, department_id)
-                    VALUES (?, ?, ?)`,[newRole, newSal, newRes]);
+                    db.query(`INSERT INTO role (title, salary, `+ 'department_id' +`)
+                    VALUES (?, ?, ?)`,[newRole, newSal, relDept]);
                     db.query(`SELECT role.title, role.id, role.salary, department.name AS department FROM role
                     RIGHT JOIN department on role.department_id = department.id;`, function (err, results) {
                         console.table(results);
@@ -137,7 +137,9 @@ const introPage = () => {
                     let empRole = response.emp_role;
                     let empMan = response.emp_manager;
                     db.query(`INSERT INTO employee(first_name, last_name, role.title, CONCAT(manager.first_name, ' ', manager.last_name) AS manager)
-                    VALUES (?, ?, ?)`,[empFN, empLN, getRoleIdByTitle("'Principal'")]);
+                    VALUES (?, ?)`,[empFN, empLN]);
+                    db.query(`INSERT INTO role(title)
+                    VALUES (?, ?)`,[empRole, empLN]);
                     db.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name 
                 AS department, role.salary, 
                 CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee 
@@ -180,28 +182,16 @@ const returnFun = () => {
         })
             
 }
-
-function getDeptById(deptId){
-    db.query('SELECT name FROM department WHERE id=id;' , function (err, results) { 
-        return results[0].name;
-        if (err){
-            return console.error(err.message);  }
-    })}
-
 function getDeptByName(deptName){
-    db.query('SELECT * FROM department WHERE department.name= '+ deptName+';' , function (err, results) { 
-return results[0].id;
-
+    db.query(`SELECT department.id FROM department WHERE name=`+ deptName + `;` , function (err, results) { 
+console.log(results);
         if (err){
-            return console.error(err.message);  }
-    })}
+            return console.error(err.message);
+        }
+    
+    })
+}
 
-function getRoleIdByTitle(roleTitle){
-    db.query('SELECT id FROM role WHERE role.title= '+ roleTitle+';' , function (err, results) { 
-return results[0].id;
-        if (err){
-            return console.error(err.message);  }
-})}
 
 
 app.use((req, res) => {
