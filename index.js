@@ -37,9 +37,7 @@ const introPage = () => {
     .then(response => {
         switch(response.intro_page){
             case 'view all departments': 
-                db.query('SELECT department.id, department.name FROM department', function (err, results) { 
-                console.table(results);
-                returnFun();});
+            viewAllDepartments();
                 break;
 
             case 'view all roles':
@@ -83,9 +81,37 @@ const introPage = () => {
                         return console.error(err.message);}})});
                     break;
 
-            case 'add a role':
-                return  addRoleFn();
-                break;
+                    case 'add a role':
+                        return inquirer.prompt([ {
+                            type: 'text',
+                            name: 'role_add',
+                            message: 'What is the role called?'
+                        },{
+                            type: 'text',
+                            name: 'salary_add',
+                            message: 'What is the salary?'
+                        },
+                        {   type: 'text',
+                            name: 'related_department',
+                            message: 'What is related department?'
+                        },]).then(response => {
+                            let newRole = response.role_add;
+                            let newSal = response.salary_add;
+                            let relDept = response.related_department;
+                            let newRes = (getDeptByName("'"+ relDept + "'"));
+        
+                            db.query(`INSERT INTO role (title, salary, department_id)
+                            VALUES (?, ?, ?)`,[newRole, newSal, relDept]);
+                            db.query(`SELECT role.title, role.id, role.salary, department.name AS department FROM role
+                            RIGHT JOIN department on role.department_id = department.id;`, function (err, results) {
+                                console.table(results);
+                                returnFun();
+                                if (err) {
+                                return console.error(err.message);
+                            }
+                        });
+                    });
+                        break;
 
             case 'add an employee':
                 return inquirer.prompt([ {
@@ -99,24 +125,27 @@ const introPage = () => {
                 },
                 {   type: 'text',
                     name: 'emp_role',
-                    message: 'What is their role?'
+                    message: 'What is their role ID?'
                 },{
                     type: 'text',
                     name: 'emp_manager',
-                    message: 'Who is their manager?'
+                    message: 'What is their manager ID?'
                 },]).then(response => {
                     let empFN = response.emp_firstN;
                     let empLN = response.emp_lastN;
                     let empRole = response.emp_role;
                     let empMan = response.emp_manager;
-                    db.query(`INSERT INTO employee(first_name, last_name, role.title, CONCAT(manager.first_name, ' ', manager.last_name) AS manager)
-                    VALUES (?, ?, ?)`,[empFN, empLN, getRoleIdByTitle("'Principal'")]);
-                    db.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name 
+                    db.query(`INSERT INTO employee(first_name, last_name, employee.role_id, employee.manager_id)
+                    VALUES (?, ?, ?, ?)`,[empFN, empLN, empRole, empMan]);
+                    db.query(
+                `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name 
                 AS department, role.salary, 
                 CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee 
                 LEFT JOIN role on employee.role_id = role.id 
                 LEFT JOIN department on role.department_id = department.id 
-                LEFT JOIN employee manager on manager.id = employee.manager_id;`, function (err, results) {
+                LEFT JOIN employee manager on manager.id = employee.manager_id;`
+                
+                , function (err, results) {
                         console.table(results);
                         returnFun();
                         if (err) {
@@ -126,7 +155,41 @@ const introPage = () => {
             });
 
             case 'update an employee role':
-                returnFun();
+                return inquirer.prompt([ {
+                    type: 'text',
+                    name: 'emp_firstN',
+                    message: 'What is their First Name?'
+                },{
+                    type: 'text',
+                    name: 'emp_lastN',
+                    message: 'What is their Last Name?'
+                },
+                {   type: 'text',
+                    name: 'emp_role',
+                    message: 'What is their new role?'
+                },]).then(response => {
+                    let empFN = response.emp_firstN;
+                    let empLN = response.emp_lastN;
+                    let empRole = response.emp_role;
+                    db.query(`UPDATE employee
+                    SET employee.role_id = `+"'"+ empRole +"'"+`
+                    WHERE  `+"'"+empFN+"'"+` = employee.first_name AND ` +"'"+empLN+"'"+`= employee.last_name;`);
+                    db.query(
+                `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name 
+                AS department, role.salary, 
+                CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee 
+                LEFT JOIN role on employee.role_id = role.id 
+                LEFT JOIN department on role.department_id = department.id 
+                LEFT JOIN employee manager on manager.id = employee.manager_id;`
+                
+                , function (err, results) {
+                        console.table(results);
+                        returnFun();
+                        if (err) {
+                        return console.error(err.message);
+                    }
+                });
+            });
                 break;
 
             default: console.log("Please select an option")
@@ -135,41 +198,7 @@ const introPage = () => {
     })
     }
 
-    async function addRoleFn(){
-        inquirer.prompt([ {
-            type: 'text',
-            name: 'role_add',
-            message: 'What is the role called?'
-        },{
-            type: 'text',
-            name: 'salary_add',
-            message: 'What is the salary?'
-        },
-        {   type: 'text',
-            name: 'related_department',
-            message: 'What is related department?'
-        },]); 
-         async function res1(response) {
-
-            let newRole = await response.role_add;
-            let newSal = await response.salary_add;
-            let relDept = await response.related_department;
-            let newRes = await getDeptByName("'"+ relDept + "'")
-
-             db.query(`INSERT INTO role (title, salary, department_id)
-            VALUES (?, ?, ?)`,[newRole, newSal, newRes])
-            
-             db.query(`SELECT role.title, role.id, role.salary, department.name AS department FROM role
-            RIGHT JOIN department on role.department_id = department.id;`, function (err, results) {
-                console.table(results);
-                returnFun();
-                if (err) {
-                    return console.error(err.message);
-                       }
-            })}
-            res1();
-};
-
+   
 const returnFun = () => {
     return  inquirer.prompt([  
         {
@@ -196,9 +225,11 @@ function getDeptById(deptId){
             return console.error(err.message);  }
     })}
 
-function getDeptByName(deptName){
-    db.query('SELECT * FROM department WHERE department.name= '+ deptName+';' , function (err, results) { 
-return results[0].id;
+
+function getDeptByName(relDept){
+    db.query('SELECT id FROM department WHERE department = ' +relDept +';' , function (err, results) { 
+console.log(results);
+        return results;
 
         if (err){
             return console.error(err.message);  }
@@ -210,6 +241,12 @@ return results[0].id;
         if (err){
             return console.error(err.message);  }
 })}
+
+function viewAllDepartments() {
+    db.query('SELECT department.id, department.name FROM department', function (err, results) { 
+        console.table(results);
+        returnFun();});
+}
 
 
 app.use((req, res) => {
