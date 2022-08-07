@@ -3,6 +3,7 @@ const cTable = require('console.table');
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const fs = require('fs');
+const { response } = require('express');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -83,35 +84,7 @@ const introPage = () => {
                     break;
 
             case 'add a role':
-                return inquirer.prompt([ {
-                    type: 'text',
-                    name: 'role_add',
-                    message: 'What is the role called?'
-                },{
-                    type: 'text',
-                    name: 'salary_add',
-                    message: 'What is the salary?'
-                },
-                {   type: 'text',
-                    name: 'related_department',
-                    message: 'What is related department?'
-                },]).then(response => {
-                    let newRole = response.role_add;
-                    let newSal = response.salary_add;
-                    let relDept = response.related_department;
-                    let newRes = (getDeptByName("'"+ relDept + "'"));
-
-                    db.query(`INSERT INTO role (title, salary, department_id)
-                    VALUES (?, ?, ?)`,[newRole, newSal, newRes]);
-                    db.query(`SELECT role.title, role.id, role.salary, department.name AS department FROM role
-                    RIGHT JOIN department on role.department_id = department.id;`, function (err, results) {
-                        console.table(results);
-                        returnFun();
-                        if (err) {
-                        return console.error(err.message);
-                    }
-                });
-            });
+                return  addRoleFn();
                 break;
 
             case 'add an employee':
@@ -161,6 +134,41 @@ const introPage = () => {
         }
     })
     }
+
+    async function addRoleFn(){
+        inquirer.prompt([ {
+            type: 'text',
+            name: 'role_add',
+            message: 'What is the role called?'
+        },{
+            type: 'text',
+            name: 'salary_add',
+            message: 'What is the salary?'
+        },
+        {   type: 'text',
+            name: 'related_department',
+            message: 'What is related department?'
+        },]); 
+         async function res1(response) {
+
+            let newRole = await response.role_add;
+            let newSal = await response.salary_add;
+            let relDept = await response.related_department;
+            let newRes = await getDeptByName("'"+ relDept + "'")
+
+             db.query(`INSERT INTO role (title, salary, department_id)
+            VALUES (?, ?, ?)`,[newRole, newSal, newRes])
+            
+             db.query(`SELECT role.title, role.id, role.salary, department.name AS department FROM role
+            RIGHT JOIN department on role.department_id = department.id;`, function (err, results) {
+                console.table(results);
+                returnFun();
+                if (err) {
+                    return console.error(err.message);
+                       }
+            })}
+            res1();
+};
 
 const returnFun = () => {
     return  inquirer.prompt([  
