@@ -23,11 +23,14 @@ Then run:
 
 node index.js
 
-And the program will display ![the first list of questions](./Public/Assets/Images/1.png),
+And the program will display 
+![the first list of questions](./Public/Assets/Images/1.png),
 
-Once the user has added their input, the realivent table with update. Here is an example of the departments table after the additon of the ![Cleaning catergory](./Public/Assets/Images/2.png),
+Once the user has added their input, the realivent table with update. Here is an example of the departments table after the additon of the 
+![Cleaning catergory](./Public/Assets/Images/2.png),
 
-Afterwards the user is prompted to either ![return OR quit](./Public/Assets/Images/3.png),
+Afterwards the user is prompted to either 
+![return OR quit](./Public/Assets/Images/3.png),
 
 
 ## Motivation: <a name="motivation"></a>
